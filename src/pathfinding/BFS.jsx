@@ -1,5 +1,3 @@
-import React from "react";
-
 const BFSAlgo = ({
   GridValue,
   GridVisited,
@@ -38,7 +36,7 @@ const BFSAlgo = ({
       let operations = [];
 
       for (let i = 0; i < direction.length; i++) {
-        if (direction[i][0] == end[0] && direction[i][1] == end[1]) {
+        if (direction[i][0] === end[0] && direction[i][1] === end[1]) {
           return [path.concat([end]), operationCount];
         }
 

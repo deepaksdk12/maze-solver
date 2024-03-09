@@ -5,7 +5,7 @@ import { DFSAlgo } from "../../pathfinding/DFS";
 import { BidirectionaAlgo } from "../../pathfinding/Bidirectional";
 
 const clearPath = (grid, setGrid) => {
-  if (grid != undefined) {
+  if (grid !== undefined) {
     const newGrid = [...grid];
     for (let y = 0; y < newGrid.length; y++) {
       for (let x = 0; x < newGrid[0].length; x++) {
@@ -35,6 +35,13 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
     endy: Math.ceil(numRows / 2) - 2,
   });
 
+  useEffect(() => {
+    const newGrid = [...grid];
+    newGrid[startNode.startx][startNode.starty] = 3;
+    newGrid[endNode.endx][endNode.endy] = 4;
+    setGrid(newGrid);
+  }, []);
+
   var algorithm = useRef("");
 
   const GridValue = (pos) => {
@@ -47,39 +54,6 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
     if (pos[0] < numCols && pos[0] >= 0 && pos[1] >= 0 && pos[1] < numRows)
       return (grid[pos[0]][pos[1]] = -1);
   };
-
-  function clearPrevStartNodes() {
-    const newGrid = [...grid];
-    for (let y = 0; y < numRows; y++) {
-      for (let x = 0; x < numCols; x++) {
-        if (newGrid[x][y] === 3) {
-          newGrid[x][y] = 0;
-          document.getElementById(`${x}-${y}`).classList.remove("startNode");
-        }
-      }
-    }
-    setGrid(newGrid);
-  }
-
-  function clearPrevEndNodes() {
-    const newGrid = [...grid];
-    for (let y = 0; y < numRows; y++) {
-      for (let x = 0; x < numCols; x++) {
-        if (newGrid[x][y] === 4) {
-          newGrid[x][y] = 0;
-        }
-      }
-    }
-    setGrid(newGrid);
-  }
-
-  function setGridWall(pos) {
-    if (pos[0] < numCols && pos[0] >= 0 && pos[1] >= 0 && pos[1] < numRows) {
-      const newGrid = [...grid];
-      newGrid[pos[0]][pos[1]] = 1;
-      setGrid(newGrid);
-    }
-  }
 
   const generateRandomWalls = () => {
     clearWalls();
@@ -129,7 +103,7 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
           .getElementById(`${x}-${y}`)
           .classList.remove("visited", "path");
 
-        if (newGrid[x][y] != 1) {
+        if (newGrid[x][y] !== 1) {
           newGrid[x][y] = 0;
         }
       }
@@ -137,38 +111,6 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
 
     setGrid(newGrid);
   };
-
-  function handleMouseDown(e) {
-    if (!searching) {
-      let x = ~~(e.clientX / 30);
-      let y = ~~(
-        (e.clientY - document.querySelector(".top").clientHeight) /
-        30
-      );
-      let id = document.getElementById(`${x}-${y}`);
-      let newGrid = [...grid];
-      if (prevX !== x || prevY !== y) {
-        if (drawingWalls && grid[x][y] === 0) {
-          id.classList.add("wall");
-          newGrid[x][y] = 1;
-        } else if (removingWalls && grid[x][y] === 1) {
-          id.classList.remove("wall");
-          newGrid[x][y] = 0;
-        } else if (movingStartNode && grid[x][y] === 0) {
-          clearPrevStartNodes();
-          newGrid[x][y] = 3;
-          id.classList.add("startNode");
-        } else if (movingEndNode && grid[x][y] == 0) {
-          clearPrevEndNodes();
-          newGrid[x][y] = 4;
-          id.classList.add("endNode");
-        }
-        setGrid(newGrid);
-        setPrevX(x);
-        setPrevY(y);
-      }
-    }
-  }
 
   useEffect(() => {
     const table = document.querySelector("table");
@@ -182,16 +124,16 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
         );
         let id = document.getElementById(`${x}-${y}`);
         let newGrid = [...grid];
-        console.log(grid[x][y] + "movingStartNode" + movingStartNode);
-
-        if (movingStartNode && grid[x][y] == 0) {
+        if (movingStartNode && grid[x][y] === 3) {
+          setMovingStartNode(false);
+        } else if (movingStartNode && grid[x][y] === 0) {
           newGrid[startNode.startx][startNode.starty] = 0;
           setStartNode({ startx: x, starty: y });
           setMovingStartNode(false);
           newGrid[x][y] = 3;
           setGrid(newGrid);
           id.classList.toggle("startNode");
-        } else if (movingEndNode && grid[x][y] == 0) {
+        } else if (movingEndNode && grid[x][y] === 0) {
           newGrid[endNode.endx][endNode.endy] = 0;
           setEndNode({ endx: x, endy: y });
           newGrid[x][y] = 4;
@@ -231,6 +173,9 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
     removingWalls,
     movingStartNode,
     movingEndNode,
+    startNode,
+    endNode,
+    setGrid,
   ]);
 
   const handledropdownbutton = (e) => {
@@ -239,13 +184,13 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
     document.getElementById("visualize").innerHTML = "Visualize " + algorithm;
   };
 
-  const handleTutorial = (e) => {
-    const tutorialButton = document.getElementById("tutorialButton");
-    const modalDialog = document.getElementById("openModal-about");
-    tutorialButton.addEventListener("click", () => {
-      modalDialog.classList.toggle("show");
-    });
-  };
+  // const handleTutorial = (e) => {
+  //   const tutorialButton = document.getElementById("tutorialButton");
+  //   const modalDialog = document.getElementById("openModal-about");
+  //   tutorialButton.addEventListener("click", () => {
+  //     modalDialog.classList.toggle("show");
+  //   });
+  // };
 
   const drawPath = function (path, c) {
     let newPath = path.slice(1, path.length - 1);
@@ -335,7 +280,7 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
               id="visualize"
               onClick={() =>
                 !searching
-                  ? algo == "BFS"
+                  ? algo === "BFS"
                     ? BFSAlgo({
                         GridValue,
                         GridVisited,
@@ -350,7 +295,7 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
                         setSearching,
                         clearPath,
                       })
-                    : algo == "DFS"
+                    : algo === "DFS"
                     ? DFSAlgo({
                         GridValue,
                         GridVisited,
@@ -365,7 +310,7 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
                         setSearching,
                         clearPath,
                       })
-                    : algo == "Bidirectional"
+                    : algo === "Bidirectional"
                     ? BidirectionaAlgo({
                         GridValue,
                         GridVisited,
@@ -395,15 +340,15 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
           <div class="dropdown">
             <button class="dropbtn">Select an Algorithm</button>
             <div id="myDropdown" class="dropdown-content">
-              <a href="#" id="BFS" onClick={handledropdownbutton}>
+              <span id="BFS" onClick={handledropdownbutton}>
                 Breadth-First-Search
-              </a>
-              <a href="#" id="DFS" onClick={handledropdownbutton}>
+              </span>
+              <span id="DFS" onClick={handledropdownbutton}>
                 Depth-First-Search
-              </a>
-              <a href="#" id="Bidirectional" onClick={handledropdownbutton}>
+              </span>
+              <span id="Bidirectional" onClick={handledropdownbutton}>
                 Bidirectional Search
-              </a>
+              </span>
             </div>
           </div>
         </div>
@@ -418,9 +363,9 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
                   <tr key={y}>
                     {Array.from({ length: numCols }, (_, x) => {
                       let isStartNode =
-                        x == startNode.startx && y == startNode.starty;
+                        x === startNode.startx && y === startNode.starty;
                       //  x === 4 && y === Math.ceil(numRows / 2) - 2;
-                      let isEndNode = x == endNode.endx && y == endNode.endy;
+                      let isEndNode = x === endNode.endx && y === endNode.endy;
                       // y === Math.ceil(numRows / 2) - 2 && x === numCols - 5;
                       return (
                         <td
@@ -443,9 +388,10 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
           </div>
         }
       </div>
-      {/* <div>
-        <div id="snackbar"></div>
-        <div id="openModal-about" className="modalDialog">
+      {
+        <div>
+          <div id="snackbar"></div>
+          {/* <div id="openModal-about" className="modalDialog">
           <div>
             <a href="#close" title="Close" class="close">
               X
@@ -473,8 +419,9 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
                <img src="../src/static/key.png" alt="Key"> 
             </div>
           </div>
+        </div> */}
         </div>
-      </div> */}
+      }
     </div>
   );
 }
