@@ -336,10 +336,10 @@ function Board({ grid, setGrid, numRows, numCols, searching, setSearching }) {
             </li>
           </ul>
         </div>
-        <div className="topleft">
-          <div class="dropdown">
-            <button class="dropbtn">Select an Algorithm</button>
-            <div id="myDropdown" class="dropdown-content">
+        <div className="topright">
+          <div className="dropdown">
+            <button className="dropbtn">Select an Algorithm</button>
+            <div id="myDropdown" className="dropdown-content">
               <span id="BFS" onClick={handledropdownbutton}>
                 Breadth-First-Search
               </span>
